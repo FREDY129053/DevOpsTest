@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from src.api.routers import group_router
+from src.api.middlewares.logging import JsonLoggingMiddleware
 from src.db import init_db_tortoise
 
 
@@ -18,7 +19,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
 
-def remove_response_from_openapi(app: FastAPI, code: str = "422"):
+def _remove_response_from_openapi(app: FastAPI, code: str = "422"):
     """
     Удаляет указанный код ответа из OpenAPI схемы приложения FastAPI.
     """
@@ -56,6 +57,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    _app.add_middleware(JsonLoggingMiddleware)
 
     _app.include_router(group_router)
 
@@ -69,7 +71,7 @@ def create_app() -> FastAPI:
 
         return JSONResponse(status_code=400, content=payload)
 
-    remove_response_from_openapi(_app, "422")
+    _remove_response_from_openapi(_app, "422")
 
     return _app
 

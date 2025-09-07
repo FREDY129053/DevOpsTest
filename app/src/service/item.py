@@ -6,7 +6,7 @@ from src.schemas.msg import Message
 async def get_stats() -> Message:
     count, avg_price = await ItemRepo.get_stats()
 
-    return Message(msg=Stats(count=count, avg_price=avg_price), status_code=200)
+    return Message(msg=Stats(count=count, avg_price=avg_price).model_dump(), status_code=200)
 
 
 async def list_items(offset: int, limit: int) -> Message:
