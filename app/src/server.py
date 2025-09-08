@@ -9,6 +9,7 @@ from tortoise import Tortoise
 from src.api.routers import group_router
 from src.api.middlewares.logging import JsonLoggingMiddleware
 from src.db import init_db_tortoise
+from src.config.load_env import load_environment, validate_environment
 
 
 @asynccontextmanager
@@ -16,6 +17,9 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """
     Инициализация БД перед приложением
     """
+    load_environment()
+    validate_environment()
+
     await init_db_tortoise(_app)
     try:
         yield

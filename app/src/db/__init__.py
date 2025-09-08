@@ -1,8 +1,8 @@
 import os
+
 from fastapi import FastAPI
 from tortoise import Tortoise
 
-DEFAULT_DB = "postgres://postgres:postgres@localhost:5432/test"
 
 async def init_db_tortoise(app: FastAPI) -> None:
     """
@@ -13,7 +13,7 @@ async def init_db_tortoise(app: FastAPI) -> None:
     if getattr(app.state, "db_url", None):
         db_url = getattr(app.state, "db_url")
     else:
-        db_url = DEFAULT_DB
+        db_url = f"postgres://{os.getenv("DB_USER")}:{os.getenv("DB_PASS")}@{os.getenv("DB_HOST")}:{os.getenv("DB_PORT")}/{os.getenv("DB_NAME")}"
 
     tortoise_config = {
         "connections": {"default": db_url},
@@ -22,7 +22,7 @@ async def init_db_tortoise(app: FastAPI) -> None:
                 "models": ["src.db.models"],
                 "default_connection": "default",
             }
-        }
+        },
     }
 
     await Tortoise.init(config=tortoise_config)
