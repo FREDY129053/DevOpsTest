@@ -1,25 +1,29 @@
+import os
 from fastapi import FastAPI
 from tortoise import Tortoise
-from tortoise.contrib.fastapi import register_tortoise
 
-TORTOISE_ORM = {
-    "connections": {"default": "postgres://postgres:postgres@localhost:5432/test"},
-    "apps": {
-        "models": {
-            "models": ["src.db.models"],
-            "default_connection": "default",
+DEFAULT_DB = "postgres://postgres:postgres@localhost:5432/test"
+
+async def init_db_tortoise(app: FastAPI) -> None:
+    """
+    Инициализация Tortoise.
+    - берём URL из app.state.db_url
+    - по дефолту считываем данные из .env
+    """
+    if getattr(app.state, "db_url", None):
+        db_url = getattr(app.state, "db_url")
+    else:
+        db_url = DEFAULT_DB
+
+    tortoise_config = {
+        "connections": {"default": db_url},
+        "apps": {
+            "models": {
+                "models": ["src.db.models"],
+                "default_connection": "default",
+            }
         }
-    },
-    "logging": True,
-}
+    }
 
-
-async def init_db_tortoise(_app: FastAPI):
-    await Tortoise.init(config=TORTOISE_ORM)
-    
+    await Tortoise.init(config=tortoise_config)
     await Tortoise.generate_schemas()
-    
-    register_tortoise(
-      app=_app,
-      config=TORTOISE_ORM,
-    )

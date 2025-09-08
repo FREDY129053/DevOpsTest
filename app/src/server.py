@@ -5,6 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from tortoise import Tortoise
 from src.api.routers import group_router
 from src.api.middlewares.logging import JsonLoggingMiddleware
 from src.db import init_db_tortoise
@@ -13,10 +14,13 @@ from src.db import init_db_tortoise
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """
-    Инициализация БД перед
+    Инициализация БД перед приложением
     """
     await init_db_tortoise(_app)
-    yield
+    try:
+        yield
+    finally:
+        await Tortoise.close_connections()
 
 
 def _remove_response_from_openapi(app: FastAPI, code: str = "422"):
@@ -70,6 +74,10 @@ def create_app() -> FastAPI:
         }
 
         return JSONResponse(status_code=400, content=payload)
+
+    @_app.get("/health")
+    async def health_check():
+        return JSONResponse(content={"status": "work"})
 
     _remove_response_from_openapi(_app, "422")
 
