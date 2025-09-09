@@ -34,7 +34,7 @@ jobs:
       - name: Load .env into env
         uses: c-py/action-dotenv-to-setenv@v5
         with:
-          env-file: .env
+          env-file: .env.example
 
       - name: Install uv (Astral)
         uses: astral-sh/setup-uv@v6
