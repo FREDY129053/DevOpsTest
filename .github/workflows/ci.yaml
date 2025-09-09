@@ -52,8 +52,8 @@ jobs:
           extra_args: --all-files
         continue-on-error: true
 
-      - name: Lint Dockerfile with hadolint (optional)
-        uses: hadolint/hadolint-action@v3
+      - name: Lint Dockerfile with hadolint
+        uses: hadolint/hadolint-action
         with:
           dockerfile: ./app/Dockerfile
 
