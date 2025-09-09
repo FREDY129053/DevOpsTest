@@ -1,6 +1,8 @@
 from decimal import ROUND_HALF_UP, Decimal
-from pydantic import BaseModel, Field, AfterValidator, ValidationError
 from typing import Annotated
+
+from pydantic import AfterValidator, BaseModel, Field, ValidationError
+
 
 def _is_valid_color(value) -> Decimal:
     if not isinstance(value, Decimal):
@@ -8,9 +10,13 @@ def _is_valid_color(value) -> Decimal:
 
     return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
+
 class AddItem(BaseModel):
     name: str = Field(description="Наименование товара", min_length=1, max_length=128)
-    price: Annotated[Decimal, AfterValidator(_is_valid_color)] = Field(description="Цена товара", gt=0, le=10_000_000, examples=['100', '100.0'])
+    price: Annotated[Decimal, AfterValidator(_is_valid_color)] = Field(
+        description="Цена товара", gt=0, le=10_000_000, examples=["100", "100.0"]
+    )
+
 
 class ItemInfo(BaseModel):
     id: int = Field(description="ID товара")
@@ -20,6 +26,7 @@ class ItemInfo(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class Stats(BaseModel):
     count: int = Field(description="Кол-во записей в БД")

@@ -7,16 +7,14 @@ def load_environment():
     """Загрузка перемнных среды из файла"""
     if os.getenv("ENV_TYPE", "prod") == "prod":
         return
-        
+
     env_file = "../.env"
-    
+
     if os.path.exists(env_file):
         load_dotenv(env_file, override=True)
         print("\033[32mINFO\033[0m:\t  env vars loaded")
     else:
-        print(
-            f"\033[31mERROR\033[0m:\t  {env_file} not found in main dir! Create it!!!"
-        )
+        print(f"\033[31mERROR\033[0m:\t  {env_file} not found in main dir! Create it!!!")
 
 
 def validate_environment():

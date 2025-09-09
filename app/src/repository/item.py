@@ -1,7 +1,8 @@
 from decimal import Decimal
 
-from src.db.models import Item
 from tortoise.functions import Avg, Count
+
+from src.db.models import Item
 
 
 async def add_item(name: str, price: Decimal) -> Item | None:
@@ -18,6 +19,7 @@ async def get_stats() -> tuple[int, float]:
     res = items[0]
 
     return res["count"], 0 if res["avg_price"] is None else float(res["avg_price"])
+
 
 async def list_items(offset: int, limit: int) -> list[Item] | None:
     try:

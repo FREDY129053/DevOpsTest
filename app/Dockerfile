@@ -13,4 +13,3 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 CMD ["sh", "-c", "uv run aerich upgrade && exec uv run python main.py"]
-

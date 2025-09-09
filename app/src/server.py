@@ -6,10 +6,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from tortoise import Tortoise
-from src.api.routers import group_router
+
 from src.api.middlewares.logging import JsonLoggingMiddleware
-from src.db import init_db_tortoise
+from src.api.routers import group_router
 from src.config.load_env import load_environment, validate_environment
+from src.db import init_db_tortoise
 
 
 @asynccontextmanager

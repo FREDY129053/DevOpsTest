@@ -24,10 +24,10 @@ def _now_iso() -> str:
 def _level_by_status(status_code: int) -> str:
     if status_code < 300:
         return "info"
-    
+
     if 300 <= status_code < 400:
         return "warning"
-    
+
     return "error"
 
 
@@ -81,11 +81,26 @@ class JsonLoggingMiddleware(BaseHTTPMiddleware):
 
             match log_level:
                 case logging.INFO:
-                    logger.log(log_level, "\033[32m" + json.dumps(log_record, ensure_ascii=False) + "\033[0m")
+                    logger.log(
+                        log_level,
+                        "\033[32m"
+                        + json.dumps(log_record, ensure_ascii=False)
+                        + "\033[0m",
+                    )
                 case logging.WARNING:
-                    logger.log(log_level, "\033[33m" + json.dumps(log_record, ensure_ascii=False) + "\033[0m")
+                    logger.log(
+                        log_level,
+                        "\033[33m"
+                        + json.dumps(log_record, ensure_ascii=False)
+                        + "\033[0m",
+                    )
                 case logging.ERROR:
-                    logger.log(log_level, "\033[31m" + json.dumps(log_record, ensure_ascii=False) + "\033[0m")
+                    logger.log(
+                        log_level,
+                        "\033[31m"
+                        + json.dumps(log_record, ensure_ascii=False)
+                        + "\033[0m",
+                    )
                 case _:
                     logger.log(log_level, json.dumps(log_record, ensure_ascii=False))
 

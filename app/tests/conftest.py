@@ -1,9 +1,12 @@
 # tests/conftest.py
-import pytest
-from fastapi.testclient import TestClient
-from src.server import create_app
 from pathlib import Path
 from uuid import uuid4
+
+import pytest
+from fastapi.testclient import TestClient
+
+from src.server import create_app
+
 
 @pytest.fixture(scope="function")
 def client(tmp_path: Path):
