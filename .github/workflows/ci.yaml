@@ -9,31 +9,21 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_db
-        options: >-
-          --health-cmd "pg_isready -U postgres -d test_db -h localhost -p 5432"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-
-    env:
-      POSTGRES_HOST: localhost
-      POSTGRES_PORT: "5432"
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: test_db
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          clean: false
 
-      - name: Install uv (Astral) in runner
+      - name: Load .env
+        uses: aarcangeli/load-dotenv@v1
+        with:
+          path: '.'
+          filenames: '.env'
+          expand: true
+
+      - name: Install uv (Astral)
         uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
@@ -43,10 +33,10 @@ jobs:
           uv python install || true
 
       - name: Sync project dependencies with uv
-        run: |
-          uv sync --frozen --no-dev --no-editable
+        working-directory: app
+        run: uv sync --frozen --no-dev --no-editable
 
-      - name: Run pre-commit hooks (linters / formatting) -- all files
+      - name: Run pre-commit hooks (all files)
         uses: pre-commit/action@v3.0.1
         with:
           extra_args: --all-files
@@ -57,8 +47,11 @@ jobs:
         with:
           dockerfile: ./app/Dockerfile
 
-      - name: Install postgresql client (for readiness checks)
+      - name: Install postgresql client
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Start Postgres service
+        uses: services to define postgres as before…
 
       - name: Wait for Postgres to be ready
         run: |
@@ -69,10 +62,10 @@ jobs:
           done
 
       - name: Run tests (pytest)
-        run: |
-          uv run pytest -q
+        working-directory: app
+        run: uv run pytest -q
 
-      - name: Build Docker image (local, not pushed)
+      - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
           context: ./app
