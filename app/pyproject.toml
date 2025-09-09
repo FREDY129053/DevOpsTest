@@ -19,5 +19,5 @@ dev = [
 
 [tool.aerich]
 tortoise_orm = "src.db.config.TORTOISE_ORM"
-location = "../migrations"
+location = "./migrations"
 src_folder = "./."
