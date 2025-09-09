@@ -1,4 +1,4 @@
-name: CI — lint / test / build
+name: CI
 
 on:
   push:
@@ -9,6 +9,21 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        options: >-
+          --health-cmd "pg_isready -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -h localhost -p ${{ env.POSTGRES_PORT }}"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - ${{ env.POSTGRES_PORT }}:5432
 
     steps:
       - name: Checkout repository
@@ -49,9 +64,6 @@ jobs:
 
       - name: Install postgresql client
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
-
-      - name: Start Postgres service
-        uses: services to define postgres as before…
 
       - name: Wait for Postgres to be ready
         run: |
