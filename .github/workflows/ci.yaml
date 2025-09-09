@@ -14,16 +14,16 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
         options: >-
-          --health-cmd "pg_isready -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -h localhost -p ${{ env.POSTGRES_PORT }}"
+          --health-cmd "pg_isready -U postgres -d test -h localhost -p 5432"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
         ports:
-          - ${{ env.POSTGRES_PORT }}:5432
+          - 5432:5432
 
     steps:
       - name: Checkout repository
@@ -31,12 +31,10 @@ jobs:
         with:
           clean: false
 
-      - name: Load .env
-        uses: aarcangeli/load-dotenv@v1
+      - name: Load .env into env
+        uses: c-py/action-dotenv-to-setenv@v5
         with:
-          path: '.'
-          filenames: '.env'
-          expand: true
+          env-file: .env
 
       - name: Install uv (Astral)
         uses: astral-sh/setup-uv@v6
