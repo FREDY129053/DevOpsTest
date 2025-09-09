@@ -1,0 +1,81 @@
+name: CI — lint / test / build
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd "pg_isready -U postgres -d test_db -h localhost -p 5432"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test_db
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv (Astral) in runner
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "latest"
+
+      - name: (Optionally) install Python via uv
+        run: |
+          uv python install || true
+
+      - name: Sync project dependencies with uv
+        run: |
+          uv sync --frozen --no-dev --no-editable
+
+      - name: Run pre-commit hooks (linters / formatting) -- all files
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files
+        continue-on-error: true
+
+      - name: Lint Dockerfile with hadolint (optional)
+        uses: hadolint/hadolint-action@v3
+        with:
+          dockerfile: ./app/Dockerfile
+
+      - name: Install postgresql client (for readiness checks)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Wait for Postgres to be ready
+        run: |
+          echo "Waiting for postgres..."
+          for i in $(seq 1 60); do
+            pg_isready -h ${{ env.POSTGRES_HOST }} -p ${{ env.POSTGRES_PORT }} -U ${{ env.POSTGRES_USER }} && break
+            sleep 1
+          done
+
+      - name: Run tests (pytest)
+        run: |
+          uv run pytest -q
+
+      - name: Build Docker image (local, not pushed)
+        uses: docker/build-push-action@v4
+        with:
+          context: ./app
+          file: ./app/Dockerfile
+          push: false
+          tags: ${{ github.repository }}:ci-${{ github.sha }}
