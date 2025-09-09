@@ -49,10 +49,11 @@ jobs:
         working-directory: app
         run: uv sync --frozen --no-dev --no-editable
 
-      - name: Run pre-commit hooks (all files)
-        uses: pre-commit/action@v3.0.1
-        with:
-          extra_args: --all-files
+      - name: Run pre-commit hooks using config in app/
+        working-directory: app
+        run: |
+          pip install pre-commit
+          pre-commit run --config .pre-commit-config.yaml --all-files
         continue-on-error: true
 
       - name: Lint Dockerfile with hadolint
